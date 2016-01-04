@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>3CC7D661-709E-4021-95E6-1B2F2864D3E2</string>
+	<key>IDESourceControlProjectName</key>
+	<string>TGcapstone</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</key>
+		<string>https://github.com/taylorgift/TGcapstone.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>TGcapstone/Builds/MacOSX/TGcapstone.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</key>
+		<string>../../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/taylorgift/TGcapstone.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</string>
+			<key>IDESourceControlWCCName</key>
+			<string>TGcapstone</string>
+		</dict>
+	</array>
+</dict>
+</plist>
