@@ -18,7 +18,7 @@
 //==============================================================================
 /**
 */
-class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor
+class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ButtonListener, private Label::Listener
 {
 public:
     TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor&);
@@ -27,12 +27,32 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+    void timerCallback();
+    
+    void sliderValueChanged (Slider* slider) override;
+    void buttonClicked (Button* button) override;
+    void changeListenerCallback (ChangeBroadcaster* changeSource);
+    void labelTextChanged (Label* label);
+    void comboBoxChanged (ComboBox* comboBox);
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     TgcapstoneAudioProcessor& processor;
-
+    
+    Slider gain,
+           threshold,
+           ratio,
+           delayTime,
+           dryDelay,
+           wetDelay,
+           feedbackDelay,
+           distortion;
+    TextButton inputMeterOnOff, compressorOnOff, delayOnOff, distortionOnOff;
+    Label rms;
+    //ComboBox distortionSelector;
+    
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TgcapstoneAudioProcessorEditor)
 };
 

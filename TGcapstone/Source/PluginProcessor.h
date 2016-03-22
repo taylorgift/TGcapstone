@@ -27,6 +27,7 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
+    void reset();
 
     void processBlock (AudioSampleBuffer&, MidiBuffer&) override;
 
@@ -64,8 +65,27 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    
+    // Adjustable parameters
+    bool compOnOff;
+    float gain;
+    float thresh;
+    int ratio;
+    float rmsValueL;
+    float rmsValueR;
+
+    bool delayOnOff;
+    float delayT;
+    float dryD;
+    float wetD;
+    float feedbackD;
 
 private:
+    // Circular buffer for delay implementation
+    int delayBuffLength;
+    int delayReadPos, delayWritePos;
+    AudioSampleBuffer delayBuffer;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TgcapstoneAudioProcessor)
 };

@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>3CC7D661-709E-4021-95E6-1B2F2864D3E2</string>
 	<key>IDESourceControlProjectName</key>
-	<string>TGcapstone</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</key>
 		<string>https://github.com/taylorgift/TGcapstone.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>TGcapstone/Builds/MacOSX/TGcapstone.xcodeproj</string>
+	<string>TGcapstone/Builds/MacOSX/TGcapstone.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>FA2C51CC7AC8B8FD46963367107727AB4E700DE7</key>

@@ -5,7 +5,7 @@
               buildVST="1" buildVST3="1" buildAU="1" buildRTAS="0" buildAAX="0"
               pluginName="TGcapstone" pluginDesc="TGcapstone" pluginManufacturer="yourcompany"
               pluginManufacturerCode="Manu" pluginCode="Pezo" pluginChannelConfigs="{1, 1}, {2, 2}"
-              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
+              pluginIsSynth="0" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="TGcapstoneAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.TGcapstone"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.2.0">

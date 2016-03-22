@@ -13,8 +13,27 @@
 
 
 //==============================================================================
-TgcapstoneAudioProcessor::TgcapstoneAudioProcessor()
+TgcapstoneAudioProcessor::TgcapstoneAudioProcessor() : delayBuffer(2,1)
 {
+    // Compressor
+    compOnOff = false;
+    gain = 0.0f;
+    thresh = 0.0f;
+    ratio = 2;
+    rmsValueL = 0.0f;
+    rmsValueR = 0.0f;
+    
+    // Delay
+    delayOnOff = false;
+    delayT = 0.0f;
+    dryD = 0.0f;
+    wetD = 0.0f;
+    feedbackD = 0.0f;
+    
+    // Circular buffer
+    delayReadPos = 0;
+    delayWritePos = 0;
+    delayBuffLength = 1;
 }
 
 TgcapstoneAudioProcessor::~TgcapstoneAudioProcessor()
@@ -29,26 +48,73 @@ const String TgcapstoneAudioProcessor::getName() const
 
 int TgcapstoneAudioProcessor::getNumParameters()
 {
-    return 0;
+    // 3 parameters
+    // gain, rmsL, rmsR
+    return 3;
 }
 
 float TgcapstoneAudioProcessor::getParameter (int index)
 {
-    return 0.0f;
+    if (index == 0)
+    {
+        return gain;
+    }
+    else if (index == 1)
+    {
+        return rmsValueL;
+    }
+    else
+    {
+        return rmsValueR;
+    }
 }
 
 void TgcapstoneAudioProcessor::setParameter (int index, float newValue)
 {
+    if (index == 0)
+    {
+        gain = newValue;
+    }
+    else if (index == 1)
+    {
+        rmsValueL = newValue;
+    }
+    else
+    {
+        rmsValueR = newValue;
+    }
 }
 
 const String TgcapstoneAudioProcessor::getParameterName (int index)
 {
-    return String();
+    if (index == 0)
+    {
+        return "Gain";
+    }
+    else if (index == 1)
+    {
+        return "RMS Left";
+    }
+    else
+    {
+        return "RMS Right";
+    }
 }
 
 const String TgcapstoneAudioProcessor::getParameterText (int index)
 {
-    return String();
+    if (index == 0)
+    {
+        return String(gain);
+    }
+    else if (index == 1)
+    {
+        return String(rmsValueL);
+    }
+    else
+    {
+        return String(rmsValueR);
+    }
 }
 
 const String TgcapstoneAudioProcessor::getInputChannelName (int channelIndex) const
@@ -123,11 +189,25 @@ void TgcapstoneAudioProcessor::changeProgramName (int index, const String& newNa
 {
 }
 
+void TgcapstoneAudioProcessor::reset()
+{
+    delayBuffer.clear();
+}
+
 //==============================================================================
 void TgcapstoneAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    // Sizing the delay buffer to match the sample rate
+    delayBuffLength = (int)(2 * sampleRate);
+    
+    if (delayBuffLength < 1)
+        delayBuffLength = 1;
+    
+    delayBuffer.setSize(2, delayBuffLength);
+    delayBuffer.clear();
+    
+    // Converting the delay position offset from seconds to samples
+    delayReadPos = (int)(delayWritePos - (delayT * getSampleRate()) + delayBuffLength) % delayBuffLength;
 }
 
 void TgcapstoneAudioProcessor::releaseResources()
@@ -138,23 +218,81 @@ void TgcapstoneAudioProcessor::releaseResources()
 
 void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
-    // In case we have more outputs than inputs, this code clears any output
+    // Information on the current block of samples
+    const int numInputChannels = getNumInputChannels();
+    const int numOutputChannels = getNumOutputChannels();
+    const int numSamples = buffer.getNumSamples();
+    
+    if (compOnOff)
+    {
+        if (gain < thresh)
+        {
+            buffer.applyGain(gain);
+        }
+        else
+        {
+            buffer.applyGain(thresh);
+        }
+    }
+    
+    if (delayOnOff)
+    {
+        // Delay read and write pointers
+        int channel, dpr, dpw;
+        
+        // Processing audio as stereo delay where processing is identical for both channels
+        for (channel = 0; channel < numInputChannels; ++channel)
+        {
+            // contains audio of one channel
+            float* currentSampleData = buffer.getSampleData(channel);
+            // circular buffer for implementing delay on the channel
+            float* currentDelayData = delayBuffer.getSampleData(jmin(channel, delayBuffer.getNumChannels() - 1));
+            
+            // temp copy of variables that need to be maintained between processBlock() calls
+            dpr = delayReadPos;
+            dpw = delayWritePos;
+            
+            for (int i = 0; i < numSamples; ++i)
+            {
+                const float in = currentSampleData[i];
+                float out = 0.0;
+                
+                // weighting the current output for with the dry/wet parameters
+                out = (dryD * in + wetD * currentDelayData[dpr]);
+                
+                // put current sample block in the delay buffer
+                currentDelayData[dpw] = in + (currentDelayData[dpr] * feedbackD);
+                
+                if (++dpr >= delayBuffLength)
+                    dpr = 0;
+                if (++dpw >= delayBuffLength)
+                    dpw = 0;
+                
+                // put output data in the buffer, replace the input
+                currentSampleData[i] = out;
+            }
+        }
+        
+        // replace the temp copy of variables
+        delayReadPos = dpr;
+        delayWritePos = dpw;
+    }
+    
+    rmsValueL = buffer.getRMSLevel(0, 0, buffer.getNumSamples());
+    rmsValueR = buffer.getRMSLevel(1, 0, buffer.getNumSamples());
+    
+    setParameter(1, rmsValueL);
+    
+    
+    
+    // In case we have more outputs than inputs, we'll clear any output
     // channels that didn't contain input data, (because these aren't
     // guaranteed to be empty - they may contain garbage).
-    // I've added this to avoid people getting screaming feedback
-    // when they first compile the plugin, but obviously you don't need to
-    // this code if your algorithm already fills all the output channels.
-    for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    for (int channel = 0; channel < getNumInputChannels(); ++channel)
+    for (int i = numInputChannels; i < numOutputChannels; ++i)
     {
-        float* channelData = buffer.getWritePointer (channel);
-
-        // ..do something to the data...
+        buffer.clear (i, 0, buffer.getNumSamples());
     }
+    
 }
 
 //==============================================================================
