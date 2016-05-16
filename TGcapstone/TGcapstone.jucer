@@ -8,7 +8,9 @@
               pluginIsSynth="0" pluginWantsMidiIn="1" pluginProducesMidiOut="0"
               pluginSilenceInIsSilenceOut="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="TGcapstoneAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.TGcapstone"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.2.0">
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="3.2.0"
+              companyName="Taylor Gift Audio" companyWebsite="taylorgift.us"
+              companyEmail="tsg21@txstate.edu">
   <MAINGROUP id="DwAsXz" name="TGcapstone">
     <GROUP id="{863BB9CD-3275-C58D-0FC7-BC15524DC9BB}" name="Source">
       <FILE id="A26FEm" name="PluginProcessor.cpp" compile="1" resource="0"
