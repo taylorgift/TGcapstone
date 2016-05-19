@@ -4,30 +4,31 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
-class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ButtonListener, private ComboBox::Listener
+class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor, public Slider::Listener, private ButtonListener, private ComboBox::Listener, public Timer
 {
 public:
-    TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor&);
+    TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor* p);
     ~TgcapstoneAudioProcessorEditor();
-
+    
     void paint (Graphics&) override;
     void resized() override;
     
-    void sliderValueChanged (Slider* slider) override;
+    void timerCallback();
+    void sliderValueChanged (Slider*);
     void buttonClicked (Button* button) override;
     void comboBoxChanged (ComboBox* comboBox);
-
+    
 private:
-    TgcapstoneAudioProcessor& getProcessor() const
+    TgcapstoneAudioProcessor* getProcessor() const
     {
-        return static_cast<TgcapstoneAudioProcessor&> (processor);
+        return static_cast <TgcapstoneAudioProcessor*> (getAudioProcessor());
     }
     
     Slider delayTime,
-           dryDelay,
-           wetDelay,
-           feedbackDelay,
-           distortion;
+    dryDelay,
+    wetDelay,
+    feedbackDelay,
+    distortion;
     TextButton delayOnOff;
     ComboBox distSelect;
     

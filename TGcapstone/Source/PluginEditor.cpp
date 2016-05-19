@@ -1,8 +1,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor& p)
-    : AudioProcessorEditor (&p)
+TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor* p)
+: AudioProcessorEditor (p)
 {
     setSize (400, 400);
     
@@ -86,7 +86,8 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     distSelect.addItem("Soft clipping (poly)", 5);
     distSelect.addItem("Soft clipping (exp)", 6);
     distSelect.addListener(this);
-        
+    
+    startTimer(50);
 }
 
 TgcapstoneAudioProcessorEditor::~TgcapstoneAudioProcessorEditor()
@@ -99,7 +100,7 @@ void TgcapstoneAudioProcessorEditor::paint (Graphics& g)
 {
     //fill the whole window
     g.fillAll (Colours::black);
-
+    
     //set the current drawing color
     g.setColour (Colours::whitesmoke);
     
@@ -115,7 +116,7 @@ void TgcapstoneAudioProcessorEditor::paint (Graphics& g)
     g.drawFittedText("Dry Signal:", 30, 250, 80, 10, Justification::left, 1);
     g.drawFittedText("Wet Signal:", 30, 300, 80, 10, Justification::left, 1);
     g.drawFittedText("Feedback:", 30, 350, 80, 10, Justification::left, 1);
-
+    
 }
 
 void TgcapstoneAudioProcessorEditor::resized()
@@ -130,27 +131,40 @@ void TgcapstoneAudioProcessorEditor::resized()
     distSelect.setBounds(30, 100, 180, 30);
 }
 
+void TgcapstoneAudioProcessorEditor::timerCallback()
+{
+    TgcapstoneAudioProcessor* ourProcessor = getProcessor();
+    
+    //delayOnOff.setValue(ourProcessor->delayOnOff, dontSendNotification);
+    delayTime.setValue(ourProcessor->delayT, dontSendNotification);
+    dryDelay.setValue(ourProcessor->dryD, dontSendNotification);
+    wetDelay.setValue(ourProcessor->wetD, dontSendNotification);
+    feedbackDelay.setValue(ourProcessor->feedbackD, dontSendNotification);
+    distortion.setValue(ourProcessor->distortion, dontSendNotification);
+    
+}
+
 void TgcapstoneAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
     if (slider == &delayTime)
     {
-        getProcessor().delayT = delayTime.getValue();
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDelayTParam, (float)delayTime.getValue());
     }
     else if (slider == &dryDelay)
     {
-        getProcessor().dryD = dryDelay.getValue();
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDryParam, (float)dryDelay.getValue());
     }
     else if (slider == &wetDelay)
     {
-        getProcessor().wetD = wetDelay.getValue();
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kWetParam, (float)wetDelay.getValue());
     }
     else if (slider == &feedbackDelay)
     {
-        getProcessor().feedbackD = feedbackDelay.getValue();
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kFeedbackParam, (float)feedbackDelay.getValue());
     }
     else if (slider == &distortion)
     {
-        getProcessor().distortion = distortion.getValue();
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortion, (float)distortion.getValue());
     }
     
 }
@@ -159,20 +173,21 @@ void TgcapstoneAudioProcessorEditor::buttonClicked (Button* button)
 {
     if (button == &delayOnOff)
     {
-        if (getProcessor().delayOnOff)
+        if (getProcessor()->delayOnOff)
         {
             delayOnOff.setButtonText("OFF");
-            getProcessor().delayOnOff = false;
+            getProcessor()->delayOnOff = false;
         }
         else
         {
             delayOnOff.setButtonText("ON");
-            getProcessor().delayOnOff = true;
+            getProcessor()->delayOnOff = true;
         }
     }
 }
 
 void TgcapstoneAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
-    getProcessor().distortionID = distSelect.getSelectedId();
+    //getProcessor()->distortionID = distSelect.getSelectedId();
+    getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortionID, distSelect.getSelectedItemIndex());
 }

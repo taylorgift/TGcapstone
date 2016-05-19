@@ -3,7 +3,7 @@
 
 //==============================================================================
 TgcapstoneAudioProcessor::TgcapstoneAudioProcessor() : delayBuffer(2,1)
-{    
+{
     // Delay
     delayOnOff = false;
     delayT = 0.5f;
@@ -35,141 +35,74 @@ int TgcapstoneAudioProcessor::getNumParameters()
 {
     // 7 parameters
     // delayOnOff, delayT, wetD, dryD, feedbackD, distortionID, distortion
-    return 7;
+    return kNumParameters;
 }
 
 float TgcapstoneAudioProcessor::getParameter (int index)
 {
-    if (index == 0)
+    switch (index)
     {
-        return delayOnOff;
+        case kDistortionID:     return distortionID;
+        case kDistortion:       return distortion;
+        case kDelayOnOffParam:  return delayOnOff;
+        case kDelayTParam:      return delayT;
+        case kDryParam:         return dryD;
+        case kWetParam:         return wetD;
+        case kFeedbackParam:    return feedbackD;
+        default:                return 0.0f;
     }
-    else if (index == 1)
-    {
-        return delayT;
-    }
-    else if (index == 2)
-    {
-        return dryD;
-    }
-    else if (index == 3)
-    {
-        return wetD;
-    }
-    else if (index == 4)
-    {
-        return feedbackD;
-    }
-    else if (index == 5)
-    {
-        return distortionID;
-    }
-    else if (index == 6)
-    {
-        return distortion;
-    }
-    else
-        return 0;
 }
 
 void TgcapstoneAudioProcessor::setParameter (int index, float newValue)
 {
-    if (index == 0)
+    switch (index)
     {
-        delayOnOff = newValue;
-    }
-    else if (index == 1)
-    {
-        delayT = newValue;
-    }
-    else if (index == 2)
-    {
-        dryD = newValue;
-    }
-    else if (index == 3)
-    {
-        wetD = newValue;
-    }
-    else if (index == 4)
-    {
-        feedbackD = newValue;
-    }
-    else if (index == 5)
-    {
-        distortionID = newValue;
-    }
-    else if (index == 6)
-    {
-        distortion = newValue;
+        case kDistortionID:
+            distortionID = newValue;
+            break;
+        case kDistortion:
+            distortion = newValue;
+            break;
+        case kDelayOnOffParam:
+            delayOnOff = newValue;
+            break;
+        case kDelayTParam:
+            delayT = newValue;
+            break;
+        case kDryParam:
+            dryD = newValue;
+            break;
+        case kWetParam:
+            wetD = newValue;
+            break;
+        case kFeedbackParam:
+            feedbackD = newValue;
+            break;
+        default:
+            break;
     }
 }
 
 const String TgcapstoneAudioProcessor::getParameterName (int index)
 {
-    if (index == 0)
+    switch (index)
     {
-        return "Delay On/Off";
+        case kDistortionID:     return "Distortion Select";
+        case kDistortion:       return "Distortion";
+        case kDelayOnOffParam:  return "Delay On/Off";
+        case kDelayTParam:      return "Delay Length";
+        case kDryParam:         return "Dry Mix";
+        case kWetParam:         return "Wet Mix";
+        case kFeedbackParam:    return "Feedback";
+        default:                break;
     }
-    else if (index == 1)
-    {
-        return "Delay Time";
-    }
-    else if (index == 2)
-    {
-        return "Dry Delay";
-    }
-    else if (index == 3)
-    {
-        return "Wet Delay";
-    }
-    else if (index == 4)
-    {
-        return "Feedback";
-    }
-    else if (index == 5)
-    {
-        return "Distortion Select";
-    }
-    else if (index == 6)
-    {
-        return "Gain";
-    }
-    else
-        return "BAD INPUT";
+    
+    return String::empty;
 }
 
 const String TgcapstoneAudioProcessor::getParameterText (int index)
 {
-    if (index == 0)
-    {
-        return String(delayOnOff);
-    }
-    else if (index == 1)
-    {
-        return String(delayT);
-    }
-    else if (index == 2)
-    {
-        return String(dryD);
-    }
-    else if (index == 3)
-    {
-        return String(wetD);
-    }
-    else if (index == 4)
-    {
-        return String(feedbackD);
-    }
-    else if (index == 5)
-    {
-        return String(distortionID);
-    }
-    else if (index == 6)
-    {
-        return String(distortion);
-    }
-    else
-        return "BAD INPUT";
+    return String (getParameter (index), 2);
 }
 
 const String TgcapstoneAudioProcessor::getInputChannelName (int channelIndex) const
@@ -194,20 +127,20 @@ bool TgcapstoneAudioProcessor::isOutputChannelStereoPair (int index) const
 
 bool TgcapstoneAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool TgcapstoneAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool TgcapstoneAudioProcessor::silenceInProducesSilenceOut() const
@@ -437,7 +370,7 @@ bool TgcapstoneAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* TgcapstoneAudioProcessor::createEditor()
 {
-    return new TgcapstoneAudioProcessorEditor (*this);
+    return new TgcapstoneAudioProcessorEditor (this);
 }
 
 void TgcapstoneAudioProcessor::getStateInformation (MemoryBlock& destData)
@@ -463,20 +396,20 @@ void TgcapstoneAudioProcessor::setStateInformation (const void* data, int sizeIn
 {
     ScopedPointer<XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
     
-    if (xmlState != nullptr)
+    if (xmlState != 0)
     {
         // make sure that it's actually our type of XML object
         if (xmlState->hasTagName("PLUGINSETTINGS"));
         {
             // pull out parameters
-            delayOnOff = xmlState->getIntAttribute("delayOnOff");
-            delayT = xmlState->getDoubleAttribute("delayT");
-            dryD = xmlState->getDoubleAttribute("dryD");
-            wetD = xmlState->getDoubleAttribute("wetD");
-            feedbackD = xmlState->getDoubleAttribute("feedbackD");
+            delayOnOff = (bool)xmlState->getIntAttribute("delayOnOff", delayOnOff);
+            delayT = (float)xmlState->getDoubleAttribute("delayT", delayT);
+            dryD = (float)xmlState->getDoubleAttribute("dryD", dryD);
+            wetD = (float)xmlState->getDoubleAttribute("wetD", wetD);
+            feedbackD = (float)xmlState->getDoubleAttribute("feedbackD", feedbackD);
             
-            distortionID = xmlState->getIntAttribute("distortionID");
-            distortion = xmlState->getDoubleAttribute("gain");
+            distortionID = xmlState->getIntAttribute("distortionID", distortionID);
+            distortion = (float)xmlState->getDoubleAttribute("gain", distortion);
         }
     }
     
