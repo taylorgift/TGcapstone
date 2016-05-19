@@ -4,7 +4,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
-class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor, private Slider::Listener, private ButtonListener, private ComboBox::Listener
+class TgcapstoneAudioProcessorEditor  : public AudioProcessorEditor, public Slider::Listener, public ButtonListener, public ComboBox::Listener, public Timer
 {
 public:
     TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor&);
@@ -13,15 +13,18 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     
-    void sliderValueChanged (Slider* slider) override;
+    void timerCallback() override;
+    void sliderValueChanged (Slider*) override;
     void buttonClicked (Button* button) override;
     void comboBoxChanged (ComboBox* comboBox);
 
 private:
     TgcapstoneAudioProcessor& getProcessor() const
     {
-        return static_cast<TgcapstoneAudioProcessor&> (processor);
+        return static_cast <TgcapstoneAudioProcessor&> (processor);
     }
+    
+    AudioProcessorParameter* getParameterFromSlider (const Slider*) const;
     
     Slider delayTime,
            dryDelay,

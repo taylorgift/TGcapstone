@@ -2,7 +2,7 @@
 #include "PluginEditor.h"
 
 TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioProcessor& p)
-    : AudioProcessorEditor (&p)
+    : AudioProcessorEditor (p)
 {
     setSize (400, 400);
     
@@ -86,7 +86,8 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     distSelect.addItem("Soft clipping (poly)", 5);
     distSelect.addItem("Soft clipping (exp)", 6);
     distSelect.addListener(this);
-        
+ 
+    startTimer(50);
 }
 
 TgcapstoneAudioProcessorEditor::~TgcapstoneAudioProcessorEditor()
@@ -130,27 +131,47 @@ void TgcapstoneAudioProcessorEditor::resized()
     distSelect.setBounds(30, 100, 180, 30);
 }
 
+void TgcapstoneAudioProcessorEditor::timerCallback()
+{
+    TgcapstoneAudioProcessor& ourProcessor = getProcessor();
+    
+    delayOnOff.setEnabled(ourProcessor.distortionID->getValue());
+    //delayOnOff.setValue(ourProcessor.delayOnOff->getValue(), dontSendNotification);
+    delayTime.setValue(ourProcessor.delayT->getValue(), dontSendNotification);
+    dryDelay.setValue(ourProcessor.dryD->getValue(), dontSendNotification);
+    wetDelay.setValue(ourProcessor.wetD->getValue(), dontSendNotification);
+    feedbackDelay.setValue(ourProcessor.feedbackD->getValue(), dontSendNotification);
+    distortion.setValue(ourProcessor.distortion->getValue(), dontSendNotification);
+    distSelect.setSelectedId(ourProcessor.distortionID->getValue(), dontSendNotification);
+    
+}
+
 void TgcapstoneAudioProcessorEditor::sliderValueChanged(Slider* slider)
 {
-    if (slider == &delayTime)
+//    if (slider == &delayTime)
+//    {
+//        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDelayTParam, (float)delayTime.getValue());
+//    }
+//    else if (slider == &dryDelay)
+//    {
+//        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDryParam, (float)dryDelay.getValue());
+//    }
+//    else if (slider == &wetDelay)
+//    {
+//        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kWetParam, (float)wetDelay.getValue());
+//    }
+//    else if (slider == &feedbackDelay)
+//    {
+//        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kFeedbackParam, (float)feedbackDelay.getValue());
+//    }
+//    else if (slider == &distortion)
+//    {
+//        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortion, (float)distortion.getValue());
+//    }
+    
+    if (AudioProcessorParameter* param = getParameterFromSlider(slider))
     {
-        getProcessor().delayT = delayTime.getValue();
-    }
-    else if (slider == &dryDelay)
-    {
-        getProcessor().dryD = dryDelay.getValue();
-    }
-    else if (slider == &wetDelay)
-    {
-        getProcessor().wetD = wetDelay.getValue();
-    }
-    else if (slider == &feedbackDelay)
-    {
-        getProcessor().feedbackD = feedbackDelay.getValue();
-    }
-    else if (slider == &distortion)
-    {
-        getProcessor().distortion = distortion.getValue();
+        param->setValueNotifyingHost((float) slider->getValue());
     }
     
 }
@@ -162,17 +183,37 @@ void TgcapstoneAudioProcessorEditor::buttonClicked (Button* button)
         if (getProcessor().delayOnOff)
         {
             delayOnOff.setButtonText("OFF");
-            getProcessor().delayOnOff = false;
+            getProcessor().delayOnOff->setValue(false);
         }
         else
         {
             delayOnOff.setButtonText("ON");
-            getProcessor().delayOnOff = true;
+            getProcessor().delayOnOff->setValue(true);
         }
     }
 }
 
 void TgcapstoneAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
-    getProcessor().distortionID = distSelect.getSelectedId();
+    getProcessor().distortionID->setValueNotifyingHost(distSelect.getSelectedId());
+//    getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortionID, distSelect.getSelectedItemIndex());
 }
+
+AudioProcessorParameter* TgcapstoneAudioProcessorEditor::getParameterFromSlider(const Slider* slider) const
+{
+    if (slider == &delayTime)
+        return getProcessor().delayT;
+    if (slider == &dryDelay)
+        return getProcessor().dryD;
+    if (slider == &wetDelay)
+        return getProcessor().wetD;
+    if (slider == &feedbackDelay)
+        return getProcessor().feedbackD;
+    if (slider == &distortion)
+        return getProcessor().distortion;
+    
+    return nullptr;
+    
+}
+
+

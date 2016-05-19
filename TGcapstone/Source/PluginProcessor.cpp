@@ -1,15 +1,69 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+class FloatParameter : public AudioProcessorParameter
+{
+public:
+    
+    FloatParameter (float defaultParameterValue, const String& paramName)
+    : defaultValue (defaultParameterValue),
+    value (defaultParameterValue),
+    name (paramName)
+    {
+    }
+    
+    float getValue() const override
+    {
+        return value;
+    }
+    
+    void setValue (float newValue) override
+    {
+        value = newValue;
+    }
+    
+    float getDefaultValue() const override
+    {
+        return defaultValue;
+    }
+    
+    String getName (int maximumStringLength) const override
+    {
+        return name;
+    }
+    
+    String getLabel() const override
+    {
+        return String();
+    }
+    
+    float getValueForText (const String& text) const override
+    {
+        return text.getFloatValue();
+    }
+    
+private:
+    float defaultValue, value;
+    String name;
+};
+
+const float defaultDelayOnOff = 0.0f;
+const float defaultDelayT = 0.5f;
+const float defaultDryD = 0.5f;
+const float defaultWetD = 0.5f;
+const float defaultFeedbackD = 0.0f;
+const float defaultDistortion = 1.0f;
+const float defaultDistortionID = 1.0f;
+
 //==============================================================================
 TgcapstoneAudioProcessor::TgcapstoneAudioProcessor() : delayBuffer(2,1)
-{    
+{
     // Delay
-    delayOnOff = false;
-    delayT = 0.5f;
-    dryD = 0.5f;
-    wetD = 0.5f;
-    feedbackD = 0.0f;
+//    delayOnOff = false;
+//    delayT = 0.5f;
+//    dryD = 0.5f;
+//    wetD = 0.5f;
+//    feedbackD = 0.0f;
     
     // Circular buffer
     delayReadPos = 0;
@@ -17,8 +71,16 @@ TgcapstoneAudioProcessor::TgcapstoneAudioProcessor() : delayBuffer(2,1)
     delayBuffLength = 1;
     
     // Distortion
-    distortionID = 1;
-    distortion = 1.0f;
+//    distortionID = 1;
+//    distortion = 1.0f;
+    
+    addParameter(delayOnOff = new FloatParameter (defaultDelayOnOff, "Delay On/Off"));
+    addParameter(delayT = new FloatParameter (defaultDelayT, "DelayTime"));
+    addParameter(dryD = new FloatParameter (defaultDryD, "Dry Mix"));
+    addParameter(wetD = new FloatParameter (defaultWetD, "Wet Mix"));
+    addParameter(feedbackD = new FloatParameter (defaultFeedbackD, "Feedback"));
+    addParameter(distortion = new FloatParameter (defaultDistortion, "Distortion"));
+    addParameter(distortionID = new FloatParameter (defaultDistortionID, "Distortion ID"));
 }
 
 TgcapstoneAudioProcessor::~TgcapstoneAudioProcessor()
@@ -31,145 +93,78 @@ const String TgcapstoneAudioProcessor::getName() const
     return JucePlugin_Name;
 }
 
-int TgcapstoneAudioProcessor::getNumParameters()
-{
-    // 7 parameters
-    // delayOnOff, delayT, wetD, dryD, feedbackD, distortionID, distortion
-    return 7;
-}
+//int TgcapstoneAudioProcessor::getNumParameters()
+//{
+//    // 7 parameters
+//    // delayOnOff, delayT, wetD, dryD, feedbackD, distortionID, distortion
+//    return kNumParameters;
+//}
+//
+//float TgcapstoneAudioProcessor::getParameter (int index)
+//{
+//    switch (index)
+//    {
+//        case kDistortionID:     return distortionID;
+//        case kDistortion:       return distortion;
+//        case kDelayOnOffParam:  return delayOnOff;
+//        case kDelayTParam:      return delayT;
+//        case kDryParam:         return dryD;
+//        case kWetParam:         return wetD;
+//        case kFeedbackParam:    return feedbackD;
+//        default:                return 0.0f;
+//    }
+//}
 
-float TgcapstoneAudioProcessor::getParameter (int index)
-{
-    if (index == 0)
-    {
-        return delayOnOff;
-    }
-    else if (index == 1)
-    {
-        return delayT;
-    }
-    else if (index == 2)
-    {
-        return dryD;
-    }
-    else if (index == 3)
-    {
-        return wetD;
-    }
-    else if (index == 4)
-    {
-        return feedbackD;
-    }
-    else if (index == 5)
-    {
-        return distortionID;
-    }
-    else if (index == 6)
-    {
-        return distortion;
-    }
-    else
-        return 0;
-}
+//void TgcapstoneAudioProcessor::setParameter (int index, float newValue)
+//{
+//    switch (index)
+//    {
+//        case kDistortionID:
+//            distortionID = newValue;
+//            break;
+//        case kDistortion:
+//            distortion = newValue;
+//            break;
+//        case kDelayOnOffParam:
+//            delayOnOff = newValue;
+//            break;
+//        case kDelayTParam:
+//            delayT = newValue;
+//            break;
+//        case kDryParam:
+//            dryD = newValue;
+//            break;
+//        case kWetParam:
+//            wetD = newValue;
+//            break;
+//        case kFeedbackParam:
+//            feedbackD = newValue;
+//            break;
+//        default:
+//            break;
+//    }
+//}
 
-void TgcapstoneAudioProcessor::setParameter (int index, float newValue)
-{
-    if (index == 0)
-    {
-        delayOnOff = newValue;
-    }
-    else if (index == 1)
-    {
-        delayT = newValue;
-    }
-    else if (index == 2)
-    {
-        dryD = newValue;
-    }
-    else if (index == 3)
-    {
-        wetD = newValue;
-    }
-    else if (index == 4)
-    {
-        feedbackD = newValue;
-    }
-    else if (index == 5)
-    {
-        distortionID = newValue;
-    }
-    else if (index == 6)
-    {
-        distortion = newValue;
-    }
-}
-
-const String TgcapstoneAudioProcessor::getParameterName (int index)
-{
-    if (index == 0)
-    {
-        return "Delay On/Off";
-    }
-    else if (index == 1)
-    {
-        return "Delay Time";
-    }
-    else if (index == 2)
-    {
-        return "Dry Delay";
-    }
-    else if (index == 3)
-    {
-        return "Wet Delay";
-    }
-    else if (index == 4)
-    {
-        return "Feedback";
-    }
-    else if (index == 5)
-    {
-        return "Distortion Select";
-    }
-    else if (index == 6)
-    {
-        return "Gain";
-    }
-    else
-        return "BAD INPUT";
-}
+//const String TgcapstoneAudioProcessor::getParameterName (int index)
+//{
+//    switch (index)
+//    {
+//        case kDistortionID:     return "Distortion Select";
+//        case kDistortion:       return "Distortion";
+//        case kDelayOnOffParam:  return "Delay On/Off";
+//        case kDelayTParam:      return "Delay Length";
+//        case kDryParam:         return "Dry Mix";
+//        case kWetParam:         return "Wet Mix";
+//        case kFeedbackParam:    return "Feedback";
+//        default:                break;
+//    }
+//    
+//    return String::empty;
+//}
 
 const String TgcapstoneAudioProcessor::getParameterText (int index)
 {
-    if (index == 0)
-    {
-        return String(delayOnOff);
-    }
-    else if (index == 1)
-    {
-        return String(delayT);
-    }
-    else if (index == 2)
-    {
-        return String(dryD);
-    }
-    else if (index == 3)
-    {
-        return String(wetD);
-    }
-    else if (index == 4)
-    {
-        return String(feedbackD);
-    }
-    else if (index == 5)
-    {
-        return String(distortionID);
-    }
-    else if (index == 6)
-    {
-        return String(distortion);
-    }
-    else
-        return "BAD INPUT";
+    return String (getParameter (index), 2);
 }
 
 const String TgcapstoneAudioProcessor::getInputChannelName (int channelIndex) const
@@ -266,7 +261,7 @@ void TgcapstoneAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     delayBuffer.clear();
     
     // Converting the delay position offset from seconds to samples
-    delayReadPos = (int)(delayWritePos - (delayT * getSampleRate()) + delayBuffLength) % delayBuffLength;
+    delayReadPos = (int)(delayWritePos - (delayT->getValue() * getSampleRate()) + delayBuffLength) % delayBuffLength;
 }
 
 void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
@@ -282,15 +277,15 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     for (int channel = 0; channel < numInputChannels; ++channel)
     {
         // Apply distortion gain
-        buffer.applyGain(channel, 0, numSamples, distortion);
+        buffer.applyGain(channel, 0, numSamples, distortion->getValue());
         
         // Put track audio data into current buffer
         float * originalData = new float;
         originalData = buffer.getSampleData(channel);
         
-        if (distortionID != 1)
+        if (distortionID->getValue() != 1)
         {
-            if (distortionID == 2)
+            if (distortionID->getValue() == 2)
             {
                 // full wave rectifier
                 for (int sample = 0; sample < numSamples; ++sample)
@@ -298,7 +293,7 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     originalData[sample] = fabs(originalData[sample]);
                 }
             }
-            else if (distortionID == 3)
+            else if (distortionID->getValue() == 3)
             {
                 // half wave rectifier
                 for (int sample = 0; sample < numSamples; ++sample)
@@ -309,7 +304,7 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     }
                 }
             }
-            else if (distortionID == 4)
+            else if (distortionID->getValue() == 4)
             {
                 // hard clipping
                 
@@ -326,7 +321,7 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     }
                 }
             }
-            else if (distortionID == 5)
+            else if (distortionID->getValue() == 5)
             {
                 // soft clipping based on quadratic function
                 
@@ -357,7 +352,7 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                     }
                 }
             }
-            else if (distortionID == 6)
+            else if (distortionID->getValue() == 6)
             {
                 // soft clipping based on exponential function
                 
@@ -385,7 +380,7 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         for (channel = 0; channel < numInputChannels; ++channel)
         {
             // set delay time
-            delayReadPos = (int)(delayWritePos - delayT * sampleRate + delayBuffLength) % delayBuffLength;
+            delayReadPos = (int)(delayWritePos - delayT->getValue() * sampleRate + delayBuffLength) % delayBuffLength;
             
             // contains audio of one channel
             float* currentSampleData = buffer.getSampleData(channel);
@@ -402,10 +397,10 @@ void TgcapstoneAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
                 float out = 0.0;
                 
                 // weighting the current output for with the dry/wet parameters
-                out = (dryD * in + wetD * currentDelayData[dpr]);
+                out = (dryD->getValue() * in + wetD->getValue() * currentDelayData[dpr]);
                 
                 // put current sample block in the delay buffer
-                currentDelayData[dpw] = in + (currentDelayData[dpr] * feedbackD);
+                currentDelayData[dpw] = in + (currentDelayData[dpr] * feedbackD->getValue());
                 
                 if (++dpr >= delayBuffLength)
                     dpr = 0;
@@ -446,14 +441,14 @@ void TgcapstoneAudioProcessor::getStateInformation (MemoryBlock& destData)
     XmlElement xml ("PLUGINSETTINGS");
     
     // add attributes to it
-    xml.setAttribute("delayOnOff", delayOnOff);
-    xml.setAttribute("delayT", delayT);
-    xml.setAttribute("dryD", dryD);
-    xml.setAttribute("wetD", wetD);
-    xml.setAttribute("feedbackD", feedbackD);
+    xml.setAttribute("delayOnOff", delayOnOff->getValue());
+    xml.setAttribute("delayT", delayT->getValue());
+    xml.setAttribute("dryD", dryD->getValue());
+    xml.setAttribute("wetD", wetD->getValue());
+    xml.setAttribute("feedbackD", feedbackD->getValue());
     
-    xml.setAttribute("distortionID", distortionID);
-    xml.setAttribute("gain", distortion);
+    xml.setAttribute("distortionID", distortionID->getValue());
+    xml.setAttribute("gain", distortion->getValue());
     
     copyXmlToBinary(xml, destData);
     
@@ -469,14 +464,14 @@ void TgcapstoneAudioProcessor::setStateInformation (const void* data, int sizeIn
         if (xmlState->hasTagName("PLUGINSETTINGS"));
         {
             // pull out parameters
-            delayOnOff = xmlState->getIntAttribute("delayOnOff");
-            delayT = xmlState->getDoubleAttribute("delayT");
-            dryD = xmlState->getDoubleAttribute("dryD");
-            wetD = xmlState->getDoubleAttribute("wetD");
-            feedbackD = xmlState->getDoubleAttribute("feedbackD");
+            delayOnOff->setValue (xmlState->getIntAttribute("delayOnOff", delayOnOff->getValue()));
+            delayT->setValue (xmlState->getDoubleAttribute("delayT", delayT->getValue()));
+            dryD->setValue (xmlState->getDoubleAttribute("dryD", dryD->getValue()));
+            wetD->setValue (xmlState->getDoubleAttribute("wetD", wetD->getValue()));
+            feedbackD->setValue (xmlState->getDoubleAttribute("feedbackD", feedbackD->getValue()));
             
-            distortionID = xmlState->getIntAttribute("distortionID");
-            distortion = xmlState->getDoubleAttribute("gain");
+            distortionID->setValue (xmlState->getIntAttribute("distortionID", distortionID->getValue()));
+            distortion->setValue (xmlState->getDoubleAttribute("gain", distortion->getValue()));
         }
     }
     

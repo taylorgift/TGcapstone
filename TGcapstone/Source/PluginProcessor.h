@@ -20,11 +20,11 @@ public:
 
     const String getName() const override;
 
-    int getNumParameters() override;
-    float getParameter (int index) override;
-    void setParameter (int index, float newValue) override;
+//    int getNumParameters() override;
+//    float getParameter (int index) override;
+//    void setParameter (int index, float newValue) override;
 
-    const String getParameterName (int index) override;
+    //const String getParameterName (int index) override;
     const String getParameterText (int index) override;
 
     const String getInputChannelName (int channelIndex) const override;
@@ -46,16 +46,35 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
+    AudioProcessorParameter* delayOnOff;
+    AudioProcessorParameter* delayT;
+    AudioProcessorParameter* dryD;
+    AudioProcessorParameter* wetD;
+    AudioProcessorParameter* feedbackD;
+    AudioProcessorParameter* distortion;
+    AudioProcessorParameter* distortionID;
+    
     // Adjustable parameters
-    bool delayOnOff;
-    float delayT;
-    float dryD;
-    float wetD;
-    float feedbackD;
-
-    int distortionID;
-    float distortion;
-
+//    bool delayOnOff;
+//    float delayT;
+//    float dryD;
+//    float wetD;
+//    float feedbackD;
+//
+//    int distortionID;
+//    float distortion;
+//    
+//    enum Parameters
+//    {
+//        kDistortionID = 0,
+//        kDistortion,
+//        kDelayOnOffParam,
+//        kDelayTParam,
+//        kDryParam,
+//        kWetParam,
+//        kFeedbackParam,
+//        kNumParameters
+//    };
     
 private:
     // Circular buffer for delay implementation
