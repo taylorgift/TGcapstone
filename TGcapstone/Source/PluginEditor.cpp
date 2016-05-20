@@ -21,7 +21,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     delayTime.setTextBoxStyle(Slider::NoTextBox, false, 90, 0);
     delayTime.setPopupDisplayEnabled(true, this);
     delayTime.setTextValueSuffix(" Delay");
-    delayTime.setValue(0.5);
     
     addAndMakeVisible(&delayTime);
     delayTime.addListener(this);
@@ -32,7 +31,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     dryDelay.setTextBoxStyle(Slider::NoTextBox, false, 90, 0);
     dryDelay.setPopupDisplayEnabled(true, this);
     dryDelay.setTextValueSuffix(" Dry Signal");
-    dryDelay.setValue(0.5);
     
     addAndMakeVisible(&dryDelay);
     dryDelay.addListener(this);
@@ -43,7 +41,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     wetDelay.setTextBoxStyle(Slider::NoTextBox, false, 90, 0);
     wetDelay.setPopupDisplayEnabled(true, this);
     wetDelay.setTextValueSuffix(" Wet Signal");
-    wetDelay.setValue(0.5);
     
     addAndMakeVisible(&wetDelay);
     wetDelay.addListener(this);
@@ -54,7 +51,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     feedbackDelay.setTextBoxStyle(Slider::NoTextBox, false, 90, 0);
     feedbackDelay.setPopupDisplayEnabled(true, this);
     feedbackDelay.setTextValueSuffix(" Delay Feedback");
-    feedbackDelay.setValue(0.0);
     
     addAndMakeVisible(&feedbackDelay);
     feedbackDelay.addListener(this);
@@ -69,7 +65,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     distortion.setTextBoxStyle(Slider::NoTextBox, false, 90, 0);
     distortion.setPopupDisplayEnabled(true, this);
     distortion.setTextValueSuffix(" Gain");
-    distortion.setValue(1.0);
     
     addAndMakeVisible(&distortion);
     distortion.addListener(this);
@@ -77,7 +72,6 @@ TgcapstoneAudioProcessorEditor::TgcapstoneAudioProcessorEditor (TgcapstoneAudioP
     /*
      *      Distortion Combobox
      */
-    distSelect.setText("Off");
     addAndMakeVisible(&distSelect);
     distSelect.addItem("Off", 1);
     distSelect.addItem("Full-wave Rectifier", 2);
@@ -110,7 +104,7 @@ void TgcapstoneAudioProcessorEditor::paint (Graphics& g)
     
     g.setFont(15.0f);
     g.drawFittedText("Gain:", 300, 50, 80, 10, Justification::left, 1);
-    g.drawFittedText("Delay Bypass", 95, 160, 80, 10, Justification::left, 1);
+    g.drawFittedText("Delay On/Off", 95, 160, 80, 10, Justification::left, 1);
     g.drawFittedText("Distortion Type:", 30, 80, 200, 10, Justification::left, 1);
     g.drawFittedText("Delay Time:", 30, 200, 80, 10, Justification::left, 1);
     g.drawFittedText("Dry Signal:", 30, 250, 80, 10, Justification::left, 1);
@@ -135,13 +129,23 @@ void TgcapstoneAudioProcessorEditor::timerCallback()
 {
     TgcapstoneAudioProcessor* ourProcessor = getProcessor();
     
-    //delayOnOff.setValue(ourProcessor->delayOnOff, dontSendNotification);
+    if (ourProcessor->delayOnOff)
+    {
+        delayOnOff.setButtonText("ON");
+        delayOnOff.setToggleState(ourProcessor->delayOnOff, dontSendNotification);
+    }
+    else
+    {
+        delayOnOff.setButtonText("OFF");
+        delayOnOff.setToggleState(ourProcessor->delayOnOff, dontSendNotification);
+    }
+    
     delayTime.setValue(ourProcessor->delayT, dontSendNotification);
     dryDelay.setValue(ourProcessor->dryD, dontSendNotification);
     wetDelay.setValue(ourProcessor->wetD, dontSendNotification);
     feedbackDelay.setValue(ourProcessor->feedbackD, dontSendNotification);
     distortion.setValue(ourProcessor->distortion, dontSendNotification);
-    
+    distSelect.setSelectedId(ourProcessor->distortionID, dontSendNotification);
 }
 
 void TgcapstoneAudioProcessorEditor::sliderValueChanged(Slider* slider)
@@ -173,21 +177,25 @@ void TgcapstoneAudioProcessorEditor::buttonClicked (Button* button)
 {
     if (button == &delayOnOff)
     {
-        if (getProcessor()->delayOnOff)
+        if (delayOnOff.getToggleState())
         {
             delayOnOff.setButtonText("OFF");
-            getProcessor()->delayOnOff = false;
+            delayOnOff.setToggleState(false, dontSendNotification);
+            getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDelayOnOffParam, false);
         }
         else
         {
             delayOnOff.setButtonText("ON");
-            getProcessor()->delayOnOff = true;
+            delayOnOff.setToggleState(true, dontSendNotification);
+            getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDelayOnOffParam, true);
         }
     }
 }
 
 void TgcapstoneAudioProcessorEditor::comboBoxChanged (ComboBox* comboBox)
 {
-    //getProcessor()->distortionID = distSelect.getSelectedId();
-    getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortionID, distSelect.getSelectedItemIndex());
+    if (comboBox == &distSelect)
+    {
+        getProcessor()->setParameterNotifyingHost(TgcapstoneAudioProcessor::kDistortionID, distSelect.getSelectedItemIndex() + 1);
+    }
 }
